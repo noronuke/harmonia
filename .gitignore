@@ -1,0 +1,10 @@
+.gradle/
+build/
+app/build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+# La clé de signature est versionnée exprès (dépôt privé) : c'est elle qui permet
+# d'installer une mise à jour par-dessus la version déjà en place.
+signature/

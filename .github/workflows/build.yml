@@ -1,0 +1,71 @@
+name: Compilation APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compilation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    name: APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Droits d'exécution de gradlew
+        run: chmod +x gradlew
+      - name: Clé de signature
+        env:
+          CLE: ${{ secrets.CLE_SIGNATURE }}
+        run: mkdir -p signature && echo "$CLE" | base64 -d > signature/cle.keystore && test -s signature/cle.keystore
+      - name: Page embarquée présente
+        run: test -s app/src/main/assets/harmonia.html
+      - name: Numéro de version
+        id: version
+        run: echo "nom=1.1.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+      - name: Compilation de l'APK
+        id: compilation
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          ./gradlew --no-daemon --stacktrace \
+            -PVERSION_CODE=$((100 + ${{ github.run_number }})) \
+            -PVERSION_NAME="${{ steps.version.outputs.nom }}" \
+            assembleDebug
+      - name: Contrôle de l'APK (page, identifiant, nom)
+        if: steps.compilation.outcome == 'success'
+        run: |
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          unzip -l "$APK" | grep -q "assets/harmonia.html"
+          AAPT=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)aapt2
+          "$AAPT" dump badging "$APK" | tee badging.txt | head -3
+          grep -q "package: name='corsica.pianu.harmonia.anh'" badging.txt
+          grep -q "application-label:'Harmonia'" badging.txt
+      - name: Dépôt de l'APK en artefact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: harmonia-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+      - name: Publication d'une Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.nom }}"
+          cp app/build/outputs/apk/debug/*.apk "Harmonia-${VERSION}.apk"
+          gh release create "v${VERSION}" "Harmonia-${VERSION}.apk" \
+            --title "Harmonia ${VERSION}" \
+            --notes "" \
+            --target "${GITHUB_SHA}"
