@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Les images et tableaux exportés par la page : écrits dans le cache de l'appli, sous partage/, et prêtés à l'appli
+     choisie (mail, message, Fichiers) par le FileProvider déclaré dans le manifeste. Rien ne sort de ce dossier. -->
+<paths>
+    <cache-path name="partage" path="partage/" />
+</paths>

@@ -61,4 +61,5 @@ tasks.withType<KotlinCompile> {
 
 dependencies {
     implementation(libs.androidx.webkit)
+    implementation(libs.androidx.core)      // FileProvider : partage des exports de la page
 }

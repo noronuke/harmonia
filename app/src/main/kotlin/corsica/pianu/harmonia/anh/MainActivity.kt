@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioFormat
@@ -29,11 +30,13 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.core.content.FileProvider
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebMessagePortCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -100,6 +103,7 @@ class MainActivity : Activity() {
         vue.settings.allowFileAccess = false
         vue.settings.allowContentAccess = false
         vue.addJavascriptInterface(micro, "HarmoniaMicro")      // le micro écouté par l'appli (voir MicroNatif)
+        vue.addJavascriptInterface(Partage(), "HarmoniaPartage") // les exports de la page (voir Partage)
         vue.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? =
                 chargeur.shouldInterceptRequest(r.url)
@@ -312,6 +316,68 @@ class MainActivity : Activity() {
             }.apply { name = "Harmonia-micro"; isDaemon = true; start() }
             etat = "ok"
             return etat
+        }
+    }
+
+    /*
+     * Le partage des exports de la page (21/11/2026, repris du pont de partage de l'accordeur d'origine) : le compte rendu
+     * d'Estimer en image, et les Courbes de styles (appui long sur un graphe) en image ou en tableau CSV. Le fichier est
+     * écrit dans le cache sous partage/, prêté par le FileProvider, et Android propose où l'envoyer (mail, message,
+     * Fichiers…). Rien d'autre n'est accessible à la page : seulement un vrai PNG, ou du CSV / texte simple de 2 Mo au plus.
+     * Construire la page (construire.js) renomme le pont attendu par la page en HarmoniaPartage.
+     */
+    inner class Partage {
+        @JavascriptInterface
+        fun partagerImage(base64: String, nom: String, texte: String): String {
+            try {
+                val octets = Base64.decode(base64, Base64.DEFAULT)
+                if (octets.size < 8 || octets[0] != 0x89.toByte() || octets[1] != 0x50.toByte() ||
+                    octets[2] != 0x4E.toByte() || octets[3] != 0x47.toByte()
+                ) return "refusé"
+                val titre = nom.removeSuffix(".png").ifBlank { "Harmonia" }
+                val fichier = File(dossier(), nomFichier(titre) + ".png")
+                fichier.writeBytes(octets)
+                return envoyer(fichier, "image/png", titre, texte)
+            } catch (e: Throwable) {
+                return "échec : " + e.message
+            }
+        }
+
+        @JavascriptInterface
+        fun partagerFichier(texte: String, nom: String, genre: String, sujet: String): String {
+            try {
+                val mime = when (genre) { "text/csv" -> "text/csv"; "text/plain" -> "text/plain"; else -> return "refusé" }
+                if (texte.length > 2_000_000) return "trop gros"
+                val ext = if (mime == "text/csv") ".csv" else ".txt"
+                // le tableur reconnaît l'UTF-8 (accents des noms de notes) à la marque d'en-tête
+                val corps = if (mime == "text/csv" && !texte.startsWith("\uFEFF")) "\uFEFF" + texte else texte
+                val titre = nom.removeSuffix(ext).ifBlank { "Harmonia" }
+                val fichier = File(dossier(), nomFichier(titre) + ext)
+                fichier.writeText(corps, Charsets.UTF_8)
+                return envoyer(fichier, mime, titre, sujet)
+            } catch (e: Throwable) {
+                return "échec : " + e.message
+            }
+        }
+
+        private fun dossier(): File = File(cacheDir, "partage").apply { mkdirs() }
+
+        private fun envoyer(fichier: File, mime: String, titre: String, texte: String): String {
+            val uri = FileProvider.getUriForFile(this@MainActivity, "$packageName.partage", fichier)
+            val envoi = Intent(Intent.ACTION_SEND).apply {
+                type = mime
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, titre)
+                if (texte.isNotBlank()) putExtra(Intent.EXTRA_TEXT, texte)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            runOnUiThread { startActivity(Intent.createChooser(envoi, titre)) }
+            return "ok"
+        }
+
+        private fun nomFichier(nom: String): String {
+            val propre = nom.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-')
+            return if (propre.isBlank()) "Harmonia" else propre.take(60)
         }
     }
 
