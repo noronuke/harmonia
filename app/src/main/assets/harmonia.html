@@ -2,7 +2,8 @@
 <html lang="fr">
 <head><script>(function(){var non=function(){return Promise.reject(new Error("hors ligne"))};window.fetch=non;
 var X=window.XMLHttpRequest;window.XMLHttpRequest=function(){var x=new X();x.open=function(){};x.send=function(){setTimeout(function(){x.onerror&&x.onerror()},0)};x.setRequestHeader=function(){};return x};
-window.WebSocket=void 0;window.EventSource=void 0;try{navigator.sendBeacon=function(){return false}}catch(e){}})();</script>
+window.WebSocket=void 0;window.EventSource=void 0;try{navigator.sendBeacon=function(){return false}}catch(e){}
+try{window.__harmoniaAvant=localStorage.length>0}catch(e){window.__harmoniaAvant=false}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Harmonia</title>
@@ -1303,7 +1304,7 @@ registerProcessor('zcvoie',ZCVoie);`;async function brancherZC(src){ZCP.wl=null;
   <button id="btnAutoriserMicro" style="margin-top:9px;border:0;border-radius:11px;padding:11px 16px;background:#7d2e3a;color:#faf8f2;font:700 14px Quicksand,-apple-system,sans-serif">Autoriser le micro</button>
 </div>
 <script>try{sauvNucNoter=function(){};sauvNucPousser=function(){};}catch(e){}
-try{if(!SET.anhOffert){SET.modeAnh=true;SET.anhOffert=1;persist();}majOngletAnh();}catch(e){}
+try{if(!SET.anhDefaut2211){if(typeof SET.modeAnh!=="boolean")SET.modeAnh=!!(SET.anhOffert||window.__harmoniaAvant===true);SET.anhDefaut2211=1;persist();}majOngletAnh();}catch(e){}
 try{var r=document.getElementById("btnRec");if(r)r.style.display="none";var s=document.getElementById("recStatut");if(s)s.remove();}catch(e){}
 try{SET.seances=false;seanceNatif=function(){return false};var c=document.getElementById("champSeances");if(c){var t=c.previousElementSibling;if(t&&t.classList.contains("section-title"))t.remove();}
 ["champSeances","iSeances","gSeancesEtat","btnSeanceDerniere","btnSeancesEffacer"].forEach(function(i){var e=document.getElementById(i);if(e)e.remove()});}catch(e){}</script></body>
