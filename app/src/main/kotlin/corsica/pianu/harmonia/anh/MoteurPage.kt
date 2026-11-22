@@ -43,6 +43,8 @@ class MoteurPage(private val activite: MainActivity, private val ecouteur: Ecout
         fun ecran(id: String)
         fun menu()
         fun enregistrer(texte: String, nom: String)
+
+        fun theme(choix: String)
     }
 
     val vue: WebView = WebView(activite)
@@ -66,7 +68,7 @@ class MoteurPage(private val activite: MainActivity, private val ecouteur: Ecout
         vue.addJavascriptInterface(micro, "HarmoniaMicro")
         vue.addJavascriptInterface(Partage(), "HarmoniaPartage")
         vue.addJavascriptInterface(Pont(), "HarmoniaNatif")
-        vue.setBackgroundColor(Color.parseColor("#F2EFE6"))
+        vue.setBackgroundColor(Color.parseColor(if (activite.sombre()) "#131513" else "#F2EFE6"))
         vue.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? =
                 if (r.url.host == HOTE && r.url.path == "/assets/harmonia.html") servir() else chargeur.shouldInterceptRequest(r.url)
@@ -144,7 +146,12 @@ class MoteurPage(private val activite: MainActivity, private val ecouteur: Ecout
         @JavascriptInterface fun menu() { attente.post { ecouteur.menu() } }
         @JavascriptInterface fun enregistrer(texte: String, nom: String) { attente.post { ecouteur.enregistrer(texte, nom) } }
         @JavascriptInterface fun version(): String = BuildConfigLu.versionName(activite)
+
+        @JavascriptInterface fun nuit(): Boolean = activite.nuitSysteme()
+        @JavascriptInterface fun theme(choix: String) { attente.post { ecouteur.theme(choix) } }
     }
+
+    fun fond(sombre: Boolean) { vue.setBackgroundColor(Color.parseColor(if (sombre) "#131513" else "#F2EFE6")) }
 
     inner class MicroNatif {
         @Volatile private var etat = "arret"

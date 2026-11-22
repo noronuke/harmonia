@@ -49,10 +49,13 @@ fun EcranAccueil(a: MainActivity) {
         ) {
 
             Box(Modifier.size(width = 130.dp, height = 136.dp), contentAlignment = Alignment.Center) {
-                Image(painterResource(R.drawable.logo_harmonia), contentDescription = null, modifier = Modifier.requiredSize(230.dp))
+
+                if (DA.sombre) Image(painterResource(R.drawable.logo_harmonia_mono), contentDescription = null, modifier = Modifier.requiredSize(230.dp),
+                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(DA.gold))
+                else Image(painterResource(R.drawable.logo_harmonia), contentDescription = null, modifier = Modifier.requiredSize(230.dp))
             }
             Text("HARMONIA", style = DA.titreBouton.copy(color = DA.gold, fontWeight = FontWeight.Medium, letterSpacing = 8.sp, fontSize = 19.sp))
-            Text("ACCORDEUR & TEMPÉRAMENTS", style = DA.section.copy(color = Color(0xFF6B6F66)), modifier = Modifier.padding(bottom = 16.dp))
+            Text("ACCORDEUR & TEMPÉRAMENTS", style = DA.section.copy(color = DA.logoSous), modifier = Modifier.padding(bottom = 16.dp))
             val pret = a.pagePrete
             BoutonCarte(Icones.horloge, "Reprendre l'accord précédent", fichier) { if (pret) page("reprendre") }
             BoutonCarte(Icones.nouveau, "Nouveau fichier d'accord") { if (pret) page("nouveau") }

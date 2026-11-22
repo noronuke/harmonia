@@ -121,7 +121,7 @@ fun MenuNatif(a: MainActivity) {
         entrees = (0 until t.length()).map { i -> val o = t.getJSONObject(i); o.getString("texte") to (if (o.getString("t") == "titre") -1 else o.getInt("n")) }
     }
     AnimatedVisibility(a.menuOuvert, enter = fadeIn(), exit = fadeOut()) {
-        Box(Modifier.fillMaxSize().background(Color(0x5C1F2A24)).clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { a.menuOuvert = false })
+        Box(Modifier.fillMaxSize().background(DA.voile).clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { a.menuOuvert = false })
     }
     AnimatedVisibility(a.menuOuvert, enter = slideInHorizontally { -it }, exit = slideOutHorizontally { -it }) {
         Column(

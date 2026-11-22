@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import corsica.pianu.harmonia.anh.ui.Coquille
+import corsica.pianu.harmonia.anh.ui.DA
 import corsica.pianu.harmonia.anh.ui.ThemeHarmonia
 import kotlinx.coroutines.launch
 
@@ -59,9 +60,41 @@ class MainActivity : ComponentActivity(), MoteurPage.Ecouteur {
         lifecycleScope.launch { moteur.appeler("importer", texte); donnees++ }
     }
 
+    private val prefs by lazy { getSharedPreferences("harmonia", MODE_PRIVATE) }
+    private var themeChoix = "auto"
+
+    fun nuitSysteme(): Boolean =
+        (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    fun sombre(): Boolean = themeChoix == "sombre" || (themeChoix != "clair" && nuitSysteme())
+
+    private fun appliquerTheme() {
+        val s = sombre()
+        DA.sombre = s
+        val fond = android.graphics.Color.parseColor(if (s) "#131513" else "#F2EFE6")
+        if (s) enableEdgeToEdge(SystemBarStyle.dark(fond), SystemBarStyle.dark(fond))
+        else enableEdgeToEdge(SystemBarStyle.light(fond, fond), SystemBarStyle.light(fond, fond))
+        if (::moteur.isInitialized) moteur.fond(s)
+    }
+
+    override fun theme(choix: String) {
+        val c = if (choix == "clair" || choix == "sombre") choix else "auto"
+        if (c == themeChoix) return
+        themeChoix = c
+        prefs.edit().putString("theme", c).apply()
+        appliquerTheme()
+    }
+
+    override fun onConfigurationChanged(nouvelle: android.content.res.Configuration) {
+        super.onConfigurationChanged(nouvelle)
+        appliquerTheme()
+
+        if (::moteur.isInitialized) lifecycleScope.launch { moteur.appeler("theme") }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        val fond = android.graphics.Color.parseColor("#F2EFE6")
-        enableEdgeToEdge(SystemBarStyle.light(fond, fond), SystemBarStyle.light(fond, fond))
+        themeChoix = prefs.getString("theme", "auto") ?: "auto"
+        appliquerTheme()
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         moteur = MoteurPage(this, this)

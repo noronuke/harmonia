@@ -2,8 +2,12 @@ package corsica.pianu.harmonia.anh.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
@@ -21,19 +25,25 @@ import corsica.pianu.harmonia.anh.R
 
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
 object DA {
-    val bg = Color(0xFFF2EFE6)
-    val panel = Color(0xFFFAF8F2)
-    val panel2 = Color(0xFFEBE7DA)
-    val line = Color(0xFFDFDCCF)
-    val line2 = Color(0xFFC9C5B6)
-    val gold = Color(0xFF7D2E3A)
-    val gold2 = Color(0xFF6B2432)
-    val green = Color(0xFF2F7A3C)
-    val red = Color(0xFFA8323F)
-    val ink = Color(0xFF1F2A24)
-    val ink2 = Color(0xFF4A554D)
-    val ink3 = Color(0xFF7A8279)
-    val tintRose = Color(0xFFEFE3E0)
+
+    var sombre by mutableStateOf(false)
+    private fun c(clair: Long, nuit: Long) = Color(if (sombre) nuit else clair)
+    val bg get() = c(0xFFF2EFE6, 0xFF131513)
+    val panel get() = c(0xFFFAF8F2, 0xFF1C1F1C)
+    val panel2 get() = c(0xFFEBE7DA, 0xFF262A26)
+    val line get() = c(0xFFDFDCCF, 0xFF2F342F)
+    val line2 get() = c(0xFFC9C5B6, 0xFF4A514A)
+    val gold get() = c(0xFF7D2E3A, 0xFFDC8E9A)
+    val gold2 get() = c(0xFF6B2432, 0xFFE8A9B2)
+    val green get() = c(0xFF2F7A3C, 0xFF5FBF74)
+    val red get() = c(0xFFA8323F, 0xFFEE7D88)
+    val ink get() = c(0xFF1F2A24, 0xFFEEEAE0)
+    val ink2 get() = c(0xFF4A554D, 0xFFC4C8BE)
+    val ink3 get() = c(0xFF7A8279, 0xFF959D93)
+    val tintRose get() = c(0xFFEFE3E0, 0xFF3B2328)
+    val surAccent get() = c(0xFFFAF8F2, 0xFF1B1315)
+    val logoSous get() = c(0xFF6B6F66, 0xFF959D93)
+    val voile get() = if (sombre) Color(0x99000000) else Color(0x5C1F2A24)
     val radius = 18.dp
     val radiusS = 11.dp
 
@@ -49,24 +59,32 @@ object DA {
     )
     val mono = FontFamily(Font(R.font.plexmono, FontWeight.Normal), Font(R.font.plexmono_medium, FontWeight.Medium))
 
-    val titreBouton = TextStyle(fontFamily = serif, fontWeight = FontWeight.Bold, fontSize = 19.sp, lineHeight = 23.sp, color = ink, fontFeatureSettings = "lnum")
-    val sous = TextStyle(fontFamily = sans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 17.5.sp, color = ink2)
-    val section = TextStyle(fontFamily = mono, fontWeight = FontWeight.Medium, fontSize = 11.sp, letterSpacing = 1.54.sp, color = gold2)
-    val titreEcran = TextStyle(fontFamily = serif, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 28.sp, color = ink, fontFeatureSettings = "lnum")
-    val corps = TextStyle(fontFamily = sans, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 21.sp, color = ink)
-    val chiffres = TextStyle(fontFamily = mono, fontSize = 12.5.sp, lineHeight = 16.sp, color = ink2)
+    val titreBouton get() = TextStyle(fontFamily = serif, fontWeight = FontWeight.Bold, fontSize = 19.sp, lineHeight = 23.sp, color = ink, fontFeatureSettings = "lnum")
+    val sous get() = TextStyle(fontFamily = sans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 17.5.sp, color = ink2)
+    val section get() = TextStyle(fontFamily = mono, fontWeight = FontWeight.Medium, fontSize = 11.sp, letterSpacing = 1.54.sp, color = gold2)
+    val titreEcran get() = TextStyle(fontFamily = serif, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 28.sp, color = ink, fontFeatureSettings = "lnum")
+    val corps get() = TextStyle(fontFamily = sans, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 21.sp, color = ink)
+    val chiffres get() = TextStyle(fontFamily = mono, fontSize = 12.5.sp, lineHeight = 16.sp, color = ink2)
 }
 
 @Composable
 fun ThemeHarmonia(contenu: @Composable () -> Unit) {
-    val couleurs = lightColorScheme(
-        primary = DA.gold, onPrimary = Color.White, primaryContainer = DA.tintRose, onPrimaryContainer = DA.gold2,
-        secondary = DA.gold, onSecondary = Color.White, secondaryContainer = DA.tintRose, onSecondaryContainer = DA.gold2,
-        background = DA.bg, onBackground = DA.ink, surface = DA.panel, onSurface = DA.ink,
-        surfaceVariant = DA.panel2, onSurfaceVariant = DA.ink2, outline = DA.line2, outlineVariant = DA.line,
-        surfaceContainer = DA.panel, surfaceContainerHigh = DA.panel, surfaceContainerHighest = DA.panel,
-        surfaceContainerLow = DA.panel, surfaceContainerLowest = DA.panel, error = DA.red
-    )
+    val primaire = DA.gold
+    val couleurs = if (DA.sombre) darkColorScheme(
+            primary = primaire, onPrimary = DA.surAccent, primaryContainer = DA.tintRose, onPrimaryContainer = DA.gold2,
+            secondary = primaire, onSecondary = DA.surAccent, secondaryContainer = DA.tintRose, onSecondaryContainer = DA.gold2,
+            background = DA.bg, onBackground = DA.ink, surface = DA.panel, onSurface = DA.ink,
+            surfaceVariant = DA.panel2, onSurfaceVariant = DA.ink2, outline = DA.line2, outlineVariant = DA.line,
+            surfaceContainer = DA.panel, surfaceContainerHigh = DA.panel, surfaceContainerHighest = DA.panel,
+            surfaceContainerLow = DA.panel, surfaceContainerLowest = DA.panel, error = DA.red
+        ) else lightColorScheme(
+            primary = primaire, onPrimary = DA.surAccent, primaryContainer = DA.tintRose, onPrimaryContainer = DA.gold2,
+            secondary = primaire, onSecondary = DA.surAccent, secondaryContainer = DA.tintRose, onSecondaryContainer = DA.gold2,
+            background = DA.bg, onBackground = DA.ink, surface = DA.panel, onSurface = DA.ink,
+            surfaceVariant = DA.panel2, onSurfaceVariant = DA.ink2, outline = DA.line2, outlineVariant = DA.line,
+            surfaceContainer = DA.panel, surfaceContainerHigh = DA.panel, surfaceContainerHighest = DA.panel,
+            surfaceContainerLow = DA.panel, surfaceContainerLowest = DA.panel, error = DA.red
+        )
     val t = Typography(
         bodyLarge = DA.corps, bodyMedium = DA.sous, labelLarge = DA.corps.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
         titleLarge = DA.titreEcran, titleMedium = DA.titreBouton, labelSmall = DA.section
