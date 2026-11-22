@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Harmonia" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/fond_appli</item>
+        <item name="android:statusBarColor">@color/fond_appli</item>
+        <item name="android:navigationBarColor">@color/fond_appli</item>
+    </style>
+</resources>

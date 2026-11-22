@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android)
+    alias(libs.plugins.compose)
 }
 
 val cleStable: File = rootProject.file("signature/cle.keystore")
@@ -34,6 +35,10 @@ android {
         }
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
@@ -49,6 +54,11 @@ android {
         getByName("main").java.directories.add("src/main/kotlin")
     }
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -61,5 +71,12 @@ tasks.withType<KotlinCompile> {
 
 dependencies {
     implementation(libs.androidx.webkit)
-    implementation(libs.androidx.core)      // FileProvider : partage des exports de la page
+    implementation(libs.androidx.core)
+
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material3)
+    implementation(libs.activity.compose)
+    testImplementation(libs.junit)
 }

@@ -9,6 +9,8 @@ androidx-documentfile = "1.1.0"
 androidx-core = "1.15.0"
 androidx-work = "2.10.1"
 junit = "4.13.2"
+compose-bom = "2026.06.01"
+activity-compose = "1.10.1"
 
 [libraries]
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "androidx-webkit" }
@@ -16,6 +18,12 @@ androidx-documentfile = { module = "androidx.documentfile:documentfile", version
 androidx-core = { module = "androidx.core:core", version.ref = "androidx-core" }
 androidx-work = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 junit = { module = "junit:junit", version.ref = "junit" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 
 [plugins]
 android = { id = "com.android.application", version.ref = "gradlePlugins-agp" }
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
